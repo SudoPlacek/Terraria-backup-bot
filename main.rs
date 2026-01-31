@@ -4,16 +4,14 @@ use tokio::time;
 use serenity::model::id::ChannelId;
 use serenity::builder::{CreateAttachment, CreateMessage};
 
-const TERRARIA_PATH: &str = "/home/placek/.local/share/Terraria/Worlds/";
+const TERRARIA_PATH: &str = "/home/placek/.local/share/Terraria/Worlds/"; //path to world
 const BACKUP_PATH: &str = "./backups/";
-// Channel ID will be read from the environment variable `DISCORD_CHANNEL_ID`
 
 #[tokio::main]
 async fn main() {
-    let token = env::var("DISCORD_TOKEN").expect("DISCORD_TOKEN not set");
+    let token = env::var("DISCORD_TOKEN").expect("DISCORD_TOKEN not set"); //token discord bot
     let http = serenity::http::Http::new(&token);
 
-    // Channel ID из переменной окружения
     let channel_id_val: u64 = env::var("DISCORD_CHANNEL_ID")
         .expect("DISCORD_CHANNEL_ID not set")
         .parse()
@@ -30,7 +28,6 @@ async fn main() {
     loop {
         interval.tick().await;
         backup_worlds();
-        // Отправка последнего бэкапа в Discord
         if let Some(file_path) = last_backup() {
             let channel_id = ChannelId::new(channel_id_val);
             match tokio::fs::read(&file_path).await {
@@ -44,7 +41,7 @@ async fn main() {
                     let attachment = CreateAttachment::bytes(bytes, filename.clone());
 
                     let message = CreateMessage::default()
-                        .content(format!("Свежий бэкап Terraria: {}", filename))
+                        .content(format!("new backup Terraria: {}", filename))
                         .add_file(attachment);
 
                     if let Err(e) = channel_id.send_message(http_ref, message).await {
